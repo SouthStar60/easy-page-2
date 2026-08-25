@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>简页 - 分类</title>
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="article.css" />
+    <style>
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .category-tag {
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        .category-tag:hover {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .category-tag.active {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .category-tag .count {
+            margin-left: 6px;
+            font-size: 0.70rem;
+            opacity: 0.6;
+        }
+        .search-box {
+            margin-bottom: 16px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: var(--font);
+            outline: none;
+            transition: border var(--transition);
+        }
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+        .filter-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .filter-info strong {
+            color: var(--text-secondary);
+        }
+        .no-result {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <header class="topnav">
+        <div class="topnav-left">
+            <button class="topnav-menu" id="menuToggle" aria-label="菜单">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <span class="topnav-title">简页</span>
+        </div>
+        <div class="topnav-right">
+            <button class="theme-btn-header" id="themeToggle">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+                <span id="themeLabel">深色</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <nav class="drawer" id="drawer">
+        <button class="drawer-close" id="drawerClose" aria-label="关闭菜单">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+        <ul class="drawer-nav">
+            <li><a href="index.html" data-nav="home">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12l9-9 9 9" />
+                        <path d="M5 10v10a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V10" />
+                    </svg>
+                    主页
+                </a></li>
+            <li><a href="repo.html" data-nav="repo">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 8v13H3V8" />
+                        <path d="M1 3h22v5H1z" />
+                        <path d="M10 12h4" />
+                    </svg>
+                    仓库
+                </a></li>
+            <li><a href="categories.html" class="active" data-nav="categories">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                    分类
+                </a></li>
+            <li><a href="about.html" data-nav="about">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    关于
+                </a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="section-title">
+            🏷️ 文章分类
+            <span class="badge">浏览</span>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <input type="text" id="categorySearch" placeholder="搜索文章标题或简介…" />
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="category-tags" id="categoryTags"></div>
+
+        <!-- 当前筛选信息 -->
+        <div class="filter-info" id="filterInfo">
+            显示 <strong>全部</strong> 文章
+        </div>
+
+        <!-- 文章列表 -->
+        <div class="article-list" id="articleList"></div>
+
+        <!-- 无结果 -->
+        <div class="no-result" id="noResult" style="display:none;">没有找到匹配的文章</div>
+
+        <div class="footer-note">
+            时间 <span>简页</span> &mdash; 用 ❤️ 构建
+        </div>
+    </main>
+
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+    <script>
+        (function() {
+            const articles = BLOG_DATA.articles;
+
+            // 统计分类
+            const catMap = {};
+            articles.forEach(a => {
+                catMap[a.category] = (catMap[a.category] || 0) + 1;
+            });
+            const allCategories = Object.keys(catMap).sort();
+
+            // DOM
+            const tagsContainer = document.getElementById('categoryTags');
+            const searchInput = document.getElementById('categorySearch');
+            const articleList = document.getElementById('articleList');
+            const filterInfo = document.getElementById('filterInfo');
+            const noResult = document.getElementById('noResult');
+
+            // 当前筛选状态
+            let currentCategory = ''; // 空表示全部
+            let currentSearch = '';   // 搜索关键词
+
+            // 渲染文章卡片
+            function renderArticles() {
+                let filtered = articles;
+
+                // 1. 按分类筛选
+                if (currentCategory) {
+                    filtered = filtered.filter(a => a.category === currentCategory);
+                }
+
+                // 2. 按搜索词筛选
+                if (currentSearch.trim() !== '') {
+                    const keyword = currentSearch.trim().toLowerCase();
+                    filtered = filtered.filter(a =>
+                        a.title.toLowerCase().includes(keyword) ||
+                        a.excerpt.toLowerCase().includes(keyword)
+                    );
+                }
+
+                // 渲染结果
+                if (filtered.length === 0) {
+                    articleList.innerHTML = '';
+                    noResult.style.display = 'block';
+                    let msg = '';
+                    if (currentCategory && currentSearch) {
+                        msg = `在「${currentCategory}」分类下没有找到包含 “${currentSearch}” 的文章`;
+                    } else if (currentCategory) {
+                        msg = `「${currentCategory}」分类下暂无文章`;
+                    } else if (currentSearch) {
+                        msg = `没有找到包含 “${currentSearch}” 的文章`;
+                    } else {
+                        msg = '没有文章';
+                    }
+                    filterInfo.innerHTML = msg;
+                    return;
+                }
+
+                noResult.style.display = 'none';
+                let info = '';
+                if (currentCategory && currentSearch) {
+                    info = `在 <strong>${currentCategory}</strong> 分类中搜索 “<strong>${currentSearch}</strong>” 结果（共 ${filtered.length} 篇）`;
+                } else if (currentCategory) {
+                    info = `显示 <strong>${currentCategory}</strong> 分类下的文章（共 ${filtered.length} 篇）`;
+                } else if (currentSearch) {
+                    info = `搜索 “<strong>${currentSearch}</strong>” 的结果（共 ${filtered.length} 篇）`;
+                } else {
+                    info = `显示 <strong>全部</strong> 文章（共 ${filtered.length} 篇）`;
+                }
+                filterInfo.innerHTML = info;
+
+                articleList.innerHTML = filtered.map(art => {
+    const pinHtml = art.pinned ? '<span class="pin-icon">📌</span> ' : '';
+    const dateHtml = art.updated ? '更新 ' + art.updated : art.date;
+    const coverClass = art.cover || '';
+    const coverStyle = art.image 
+        ? `background-image: url('${art.image}'); background-size: cover; background-position: center;` 
+        : '';
+    return `
+        <a href="${art.link || '#'}" class="article-card" data-id="${art.id}">
+            <div class="article-cover">
+                <div class="cover-img ${coverClass}" style="${coverStyle}"></div>
+                ${art.pinned ? '<span class="cover-tag top">置顶</span>' : ''}
+                <span class="cover-tag">${art.category}</span>
+            </div>
+            <div class="article-body">
+                <div class="article-title">${pinHtml}${art.title}</div>
+                <div class="article-meta">
+                    <span>${art.date}</span>
+                    <span class="dot">·</span>
+                    <span>${dateHtml}</span>
+                    <span class="dot">·</span>
+                    <span class="cat">${art.category}</span>
+                </div>
+                <div class="article-excerpt">${art.excerpt}</div>
+                <div class="article-footer">
+                    <span>阅读全文 →</span>
+                </div>
+            </div>
+        </a>
+    `;
+}).join('');
+            }
+
+            // 渲染分类标签
+            function renderTags(activeCat = '') {
+                tagsContainer.innerHTML = allCategories.map(cat => {
+                    const active = (activeCat && cat === activeCat) ? 'active' : '';
+                    return `
+                        <span class="category-tag ${active}" data-category="${cat}">
+                            ${cat}
+                            <span class="count">(${catMap[cat]})</span>
+                        </span>
+                    `;
+                }).join('');
+
+                // 绑定点击事件
+                document.querySelectorAll('.category-tag').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const cat = this.dataset.category;
+                        // 如果点击的是当前激活的分类，则取消分类筛选
+                        if (currentCategory === cat) {
+                            currentCategory = '';
+                        } else {
+                            currentCategory = cat;
+                        }
+                        // 清空搜索框
+                        searchInput.value = '';
+                        currentSearch = '';
+                        // 更新标签高亮
+                        renderTags(currentCategory);
+                        // 重新渲染文章
+                        renderArticles();
+                        // 滚动到列表
+                        articleList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+            }
+
+            // 搜索事件
+            searchInput.addEventListener('input', function() {
+                const val = this.value;
+                // 如果搜索框有内容，清除分类筛选
+                if (val.trim() !== '') {
+                    currentCategory = '';
+                    renderTags(''); // 取消所有标签高亮
+                }
+                currentSearch = val;
+                renderArticles();
+            });
+
+            // 初始化
+            renderTags('');
+            renderArticles();
+
+        })();
+    </script>
+
+</body>
+</html>

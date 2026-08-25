@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>简页 - 仓库</title>
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="article.css" />
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <header class="topnav">
+        <div class="topnav-left">
+            <button class="topnav-menu" id="menuToggle" aria-label="菜单">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <span class="topnav-title">简页</span>
+        </div>
+        <div class="topnav-right">
+            <button class="theme-btn-header" id="themeToggle">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+                <span id="themeLabel">深色</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <nav class="drawer" id="drawer">
+        <button class="drawer-close" id="drawerClose" aria-label="关闭菜单">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+        <ul class="drawer-nav">
+            <li><a href="index.html" data-nav="home">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12l9-9 9 9" />
+                        <path d="M5 10v10a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V10" />
+                    </svg>
+                    主页
+                </a></li>
+            <li><a href="repo.html" class="active" data-nav="repo">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 8v13H3V8" />
+                        <path d="M1 3h22v5H1z" />
+                        <path d="M10 12h4" />
+                    </svg>
+                    仓库
+                </a></li>
+            <li><a href="categories.html" data-nav="categories">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                    分类
+                </a></li>
+            <li><a href="about.html" data-nav="about">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    关于
+                </a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="section-title">
+            📦 仓库项目
+            <span class="badge">开源</span>
+        </div>
+        <div class="article-list" id="repoList"></div>
+
+        <div class="footer-note">
+            时间 <span>简页</span> &mdash; 用 ❤️ 构建
+        </div>
+    </main>
+
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+    <script>
+        (function() {
+            const repos = BLOG_DATA.repos;
+            const container = document.getElementById('repoList');
+            if (container) {
+    container.innerHTML = repos.map(repo => {
+        const coverStyle = repo.image 
+            ? `background-image: url('${repo.image}'); background-size: cover; background-position: center;` 
+            : `background: linear-gradient(135deg, #1a2a3a, #2d4a6a);`;
+        return `
+            <a href="${repo.link || '#'}" class="article-card" data-id="${repo.id}">
+                <div class="article-cover" style="${coverStyle}">
+                    <span class="cover-tag">${repo.language}</span>
+                </div>
+                <div class="article-body">
+                    <div class="article-title">${repo.name}</div>
+                    <div class="article-excerpt" style="-webkit-line-clamp: 2;">${repo.description}</div>
+                    <div class="article-footer">
+                        <span>查看 →</span>
+                    </div>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+        })();
+    </script>
+
+</body>
+</html>
