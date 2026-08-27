@@ -171,7 +171,6 @@
 
     if (langToggle) {
         langToggle.addEventListener('click', toggleLangMenu);
-        // 点击其他地方隐藏菜单
         document.addEventListener('click', function(e) {
             if (langMenuVisible && !langMenu.contains(e.target) && e.target !== langToggle) {
                 hideLangMenu();
@@ -200,7 +199,7 @@
 
     // ---- Init ----
     initTheme();
-    window.initLanguage(); // 由 language.js 提供
+    window.initLanguage();
 
     window.showToast = showToast;
     console.log('你好，简页！');

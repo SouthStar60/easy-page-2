@@ -92,20 +92,18 @@
             <span class="topnav-title" data-i18n="site_name">简页</span>
         </div>
         <div class="topnav-right">
-            <!-- 主题切换：方形仅图标 -->
             <button class="theme-btn-header" id="themeToggle" aria-label="切换主题">
                 <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
             </button>
-            <!-- 语言切换：方形仅图标 + 语言缩写 -->
             <button class="lang-btn-header" id="langToggle" aria-label="切换语言">
                 <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="2" y1="12" x2="22" y2="12" />
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
-                <span class="lang-label" id="langLabel"></span>
+                <span class="lang-label" id="langLabel">中</span>
             </button>
         </div>
     </header>
@@ -167,7 +165,6 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- 脚本 -->
     <script src="data.js"></script>
     <script src="language.js"></script>
     <script src="main.js"></script>
@@ -189,34 +186,43 @@
             const filterInfo = document.getElementById('filterInfo');
             const noResult = document.getElementById('noResult');
 
-            // 当前筛选状态
             let currentCategory = '';
             let currentSearch = '';
 
             // 渲染文章卡片
             function renderArticles() {
                 let filtered = articles;
-
                 if (currentCategory) {
                     filtered = filtered.filter(a => a.category === currentCategory);
                 }
-
                 if (currentSearch.trim() !== '') {
                     const keyword = currentSearch.trim().toLowerCase();
                     filtered = filtered.filter(a =>
-                        a.title.toLowerCase().includes(keyword) ||
-                        a.excerpt.toLowerCase().includes(keyword)
+                        (typeof a.title === 'object' ? a.title.zh : a.title).toLowerCase().includes(keyword) ||
+                        (typeof a.excerpt === 'object' ? a.excerpt.zh : a.excerpt).toLowerCase().includes(keyword)
                     );
                 }
+
+                const lang = window.getCurrentLang();
+                const langData = window.LANG[lang];
+                const updatedPrefix = langData.updated_prefix || '更新 ';
+                const pinnedText = langData.pinned || '置顶';
+                const readmoreText = langData.readmore || '阅读全文 →';
 
                 if (filtered.length === 0) {
                     articleList.innerHTML = '';
                     noResult.style.display = 'block';
                     let msg = '';
                     if (currentCategory && currentSearch) {
-                        msg = `在「${currentCategory}」分类下没有找到包含 “${currentSearch}” 的文章`;
+                        const catDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[currentCategory]
+                            ? (window.CATEGORY_NAMES[currentCategory][lang] || window.CATEGORY_NAMES[currentCategory].zh)
+                            : currentCategory;
+                        msg = `在「${catDisplay}」分类下没有找到包含 “${currentSearch}” 的文章`;
                     } else if (currentCategory) {
-                        msg = `「${currentCategory}」分类下暂无文章`;
+                        const catDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[currentCategory]
+                            ? (window.CATEGORY_NAMES[currentCategory][lang] || window.CATEGORY_NAMES[currentCategory].zh)
+                            : currentCategory;
+                        msg = `「${catDisplay}」分类下暂无文章`;
                     } else if (currentSearch) {
                         msg = `没有找到包含 “${currentSearch}” 的文章`;
                     } else {
@@ -229,9 +235,15 @@
                 noResult.style.display = 'none';
                 let info = '';
                 if (currentCategory && currentSearch) {
-                    info = `在 <strong>${currentCategory}</strong> 分类中搜索 “<strong>${currentSearch}</strong>” 结果（共 ${filtered.length} 篇）`;
+                    const catDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[currentCategory]
+                        ? (window.CATEGORY_NAMES[currentCategory][lang] || window.CATEGORY_NAMES[currentCategory].zh)
+                        : currentCategory;
+                    info = `在 <strong>${catDisplay}</strong> 分类中搜索 “<strong>${currentSearch}</strong>” 结果（共 ${filtered.length} 篇）`;
                 } else if (currentCategory) {
-                    info = `显示 <strong>${currentCategory}</strong> 分类下的文章（共 ${filtered.length} 篇）`;
+                    const catDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[currentCategory]
+                        ? (window.CATEGORY_NAMES[currentCategory][lang] || window.CATEGORY_NAMES[currentCategory].zh)
+                        : currentCategory;
+                    info = `显示 <strong>${catDisplay}</strong> 分类下的文章（共 ${filtered.length} 篇）`;
                 } else if (currentSearch) {
                     info = `搜索 “<strong>${currentSearch}</strong>” 的结果（共 ${filtered.length} 篇）`;
                 } else {
@@ -240,31 +252,38 @@
                 filterInfo.innerHTML = info;
 
                 articleList.innerHTML = filtered.map(art => {
+                    const title = typeof art.title === 'object' ? (art.title[lang] || art.title.zh) : art.title;
+                    const excerpt = typeof art.excerpt === 'object' ? (art.excerpt[lang] || art.excerpt.zh) : art.excerpt;
+                    const categoryDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[art.category]
+                        ? (window.CATEGORY_NAMES[art.category][lang] || window.CATEGORY_NAMES[art.category].zh)
+                        : art.category;
+
                     const pinHtml = art.pinned ? '<span class="pin-icon">📌</span> ' : '';
-                    const dateHtml = art.updated ? '更新 ' + art.updated : art.date;
+                    const dateHtml = art.updated ? updatedPrefix + art.updated : art.date;
                     const coverClass = art.cover || '';
-                    const coverStyle = art.image 
-                        ? `background-image: url('${art.image}'); background-size: cover; background-position: center;` 
+                    const coverStyle = art.image
+                        ? `background-image: url('${art.image}'); background-size: cover; background-position: center;`
                         : '';
+
                     return `
                         <a href="${art.link || '#'}" class="article-card">
                             <div class="article-cover">
                                 <div class="cover-img ${coverClass}" style="${coverStyle}"></div>
-                                ${art.pinned ? '<span class="cover-tag top" data-i18n="pinned">置顶</span>' : ''}
+                                ${art.pinned ? `<span class="cover-tag top">${pinnedText}</span>` : ''}
                                 <span class="cover-tag">${art.category}</span>
                             </div>
                             <div class="article-body">
-                                <div class="article-title">${pinHtml}${art.title}</div>
+                                <div class="article-title">${pinHtml}${title}</div>
                                 <div class="article-meta">
                                     <span>${art.date}</span>
                                     <span class="dot">·</span>
                                     <span>${dateHtml}</span>
                                     <span class="dot">·</span>
-                                    <span class="cat">${art.category}</span>
+                                    <span class="cat">${categoryDisplay}</span>
                                 </div>
-                                <div class="article-excerpt">${art.excerpt}</div>
+                                <div class="article-excerpt">${excerpt}</div>
                                 <div class="article-footer">
-                                    <span data-i18n="readmore">阅读全文 →</span>
+                                    <span>${readmoreText}</span>
                                 </div>
                             </div>
                         </a>
@@ -274,11 +293,15 @@
 
             // 渲染分类标签
             function renderTags(activeCat = '') {
+                const lang = window.getCurrentLang();
                 tagsContainer.innerHTML = allCategories.map(cat => {
                     const active = (activeCat && cat === activeCat) ? 'active' : '';
+                    const displayName = window.CATEGORY_NAMES && window.CATEGORY_NAMES[cat]
+                        ? (window.CATEGORY_NAMES[cat][lang] || window.CATEGORY_NAMES[cat].zh)
+                        : cat;
                     return `
                         <span class="category-tag ${active}" data-category="${cat}">
-                            ${cat}
+                            ${displayName}
                             <span class="count">(${catMap[cat]})</span>
                         </span>
                     `;
@@ -312,9 +335,15 @@
                 renderArticles();
             });
 
-            // 初始化
+            // 初次渲染
             renderTags('');
             renderArticles();
+
+            // 监听语言切换
+            window.addEventListener('languageChanged', function() {
+                renderTags(currentCategory);
+                renderArticles();
+            });
         })();
     </script>
 

@@ -9,7 +9,7 @@
 </head>
 <body data-page="repo">
 
-    <!-- 顶部导航同 index（略） -->
+    <!-- 顶部导航 -->
     <header class="topnav">
         <div class="topnav-left">
             <button class="topnav-menu" id="menuToggle" aria-label="菜单">
@@ -33,11 +33,12 @@
                     <line x1="2" y1="12" x2="22" y2="12" />
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
-                <span class="lang-label" id="langLabel"></span>
+                <span class="lang-label" id="langLabel">中</span>
             </button>
         </div>
     </header>
 
+    <!-- 抽屉 -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
     <nav class="drawer" id="drawer">
         <button class="drawer-close" id="drawerClose" aria-label="关闭菜单">
@@ -54,9 +55,10 @@
         </ul>
     </nav>
 
+    <!-- 主要内容 -->
     <main class="container">
         <div class="section-title">
-            <span data-i18n="repos">仓库项目</span>
+            <span data-i18n="repos">📦 仓库项目</span>
             <span class="badge" data-i18n="badge">开源</span>
         </div>
         <div class="article-list" id="repoList"></div>
@@ -66,6 +68,7 @@
         </div>
     </main>
 
+    <!-- 返回顶部 -->
     <button class="back-top" id="backTop" aria-label="回到顶部">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="18 15 12 9 6 15" />
@@ -81,27 +84,43 @@
         (function() {
             const repos = BLOG_DATA.repos;
             const container = document.getElementById('repoList');
-            if (container) {
+
+            function renderRepos() {
+                if (!container) return;
+                const lang = window.getCurrentLang();
+                const langData = window.LANG[lang];
+                const viewText = langData.view || '查看 →';
+
                 container.innerHTML = repos.map(repo => {
-                    const coverStyle = repo.image 
-                        ? `background-image: url('${repo.image}'); background-size: cover; background-position: center;` 
+                    const name = typeof repo.name === 'object' ? (repo.name[lang] || repo.name.zh) : repo.name;
+                    const description = typeof repo.description === 'object' ? (repo.description[lang] || repo.description.zh) : repo.description;
+                    const languageDisplay = window.LANGUAGE_NAMES && window.LANGUAGE_NAMES[repo.language]
+                        ? (window.LANGUAGE_NAMES[repo.language][lang] || window.LANGUAGE_NAMES[repo.language].zh)
+                        : repo.language;
+
+                    const coverStyle = repo.image
+                        ? `background-image: url('${repo.image}'); background-size: cover; background-position: center;`
                         : `background: linear-gradient(135deg, #1a2a3a, #2d4a6a);`;
+
                     return `
                         <a href="${repo.link || '#'}" class="article-card">
                             <div class="article-cover" style="${coverStyle}">
-                                <span class="cover-tag">${repo.language}</span>
+                                <span class="cover-tag">${languageDisplay}</span>
                             </div>
                             <div class="article-body">
-                                <div class="article-title">${repo.name}</div>
-                                <div class="article-excerpt" style="-webkit-line-clamp: 2;">${repo.description}</div>
+                                <div class="article-title">${name}</div>
+                                <div class="article-excerpt" style="-webkit-line-clamp: 2;">${description}</div>
                                 <div class="article-footer">
-                                    <span data-i18n="view">查看 →</span>
+                                    <span>${viewText}</span>
                                 </div>
                             </div>
                         </a>
                     `;
                 }).join('');
             }
+
+            renderRepos();
+            window.addEventListener('languageChanged', renderRepos);
         })();
     </script>
 

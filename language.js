@@ -20,7 +20,9 @@ const LANG = {
         'filter_all': '全部',
         'no_result': '没有找到匹配的文章',
         'footer_text': '时间 {site} — 用 ❤️ 构建',
-        'site_name': '简页'
+        'site_name': '简页',
+        'updated_prefix': '更新 ',
+        'pinned': '置顶'
     },
     'en': {
         'nav.home': 'Home',
@@ -42,38 +44,57 @@ const LANG = {
         'filter_all': 'All',
         'no_result': 'No matching articles found',
         'footer_text': '{site} — Built with ❤️',
-        'site_name': 'Jianye'
+        'site_name': 'Jianye',
+        'updated_prefix': 'Updated ',
+        'pinned': 'Pinned'
     }
 };
 
-let currentLang = 'zh';
+const CATEGORY_NAMES = {
+    'javascript': { zh: 'JavaScript', en: 'JavaScript' },
+    'css': { zh: 'CSS', en: 'CSS' },
+    'rust': { zh: 'Rust', en: 'Rust' },
+    '设计': { zh: '设计', en: 'Design' },
+    '性能': { zh: '性能', en: 'Performance' }
+};
+
+const LANGUAGE_NAMES = {
+    'TypeScript': { zh: 'TypeScript', en: 'TypeScript' },
+    'Rust': { zh: 'Rust', en: 'Rust' },
+    'CSS': { zh: 'CSS', en: 'CSS' },
+    'Go': { zh: 'Go', en: 'Go' }
+};
+
+function getCurrentLang() {
+    let lang = localStorage.getItem('blog-lang');
+    if (lang && LANG[lang]) return lang;
+    const browserLang = navigator.language || navigator.languages[0];
+    const defaultLang = browserLang.startsWith('zh') ? 'zh' : 'en';
+    localStorage.setItem('blog-lang', defaultLang);
+    return defaultLang;
+}
 
 function setLanguage(lang) {
     if (!LANG[lang]) return;
-    currentLang = lang;
     localStorage.setItem('blog-lang', lang);
-    applyLanguage();
-    // 更新语言按钮显示（可选）
+    // 可选：快速更新按钮文本，但刷新后会重置，保留也无妨
     const langLabel = document.querySelector('.lang-btn-header .lang-label');
     if (langLabel) langLabel.textContent = lang === 'zh' ? '中' : 'EN';
-}
-
-function getCurrentLang() {
-    return currentLang;
+    // 刷新页面，使所有内容重新加载并应用新语言
+    location.reload();
 }
 
 function applyLanguage() {
-    const langData = LANG[currentLang];
+    const lang = getCurrentLang();
+    const langData = LANG[lang];
     if (!langData) return;
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         let text = langData[key];
         if (text === undefined) return;
-        // 支持模板变量 {site}
         text = text.replace(/\{site\}/g, langData.site_name || 'Jianye');
         el.textContent = text;
     });
-    // 更新页面 title
     const titleEl = document.querySelector('title');
     if (titleEl) {
         const siteName = langData.site_name || 'Jianye';
@@ -90,22 +111,17 @@ function applyLanguage() {
 }
 
 function initLanguage() {
-    let saved = localStorage.getItem('blog-lang');
-    if (saved && LANG[saved]) {
-        currentLang = saved;
-    } else {
-        const browserLang = navigator.language || navigator.languages[0];
-        currentLang = browserLang.startsWith('zh') ? 'zh' : 'en';
-        localStorage.setItem('blog-lang', currentLang);
-    }
+    getCurrentLang();
     applyLanguage();
-    // 更新语言按钮显示
+    const lang = getCurrentLang();
     const langLabel = document.querySelector('.lang-btn-header .lang-label');
-    if (langLabel) langLabel.textContent = currentLang === 'zh' ? '中' : 'EN';
+    if (langLabel) langLabel.textContent = lang === 'zh' ? '中' : 'EN';
 }
 
-// 暴露全局
 window.LANG = LANG;
+window.CATEGORY_NAMES = CATEGORY_NAMES;
+window.LANGUAGE_NAMES = LANGUAGE_NAMES;
 window.setLanguage = setLanguage;
 window.getCurrentLang = getCurrentLang;
 window.initLanguage = initLanguage;
+window.applyLanguage = applyLanguage;

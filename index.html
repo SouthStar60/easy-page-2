@@ -33,7 +33,7 @@
                     <line x1="2" y1="12" x2="22" y2="12" />
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
-                <span class="lang-label" id="langLabel"></span>
+                <span class="lang-label" id="langLabel">中</span>
             </button>
         </div>
     </header>
@@ -145,42 +145,59 @@
     <script src="main.js"></script>
     <script>
         (function() {
-            const articles = BLOG_DATA.articles;
-            const container = document.getElementById('articleList');
+            function renderArticles() {
+                const articles = BLOG_DATA.articles;
+                const container = document.getElementById('articleList');
+                if (!container) return;
 
-            if (container) {
+                const lang = window.getCurrentLang();
+                const langData = window.LANG[lang];
+                const updatedPrefix = langData.updated_prefix || '更新 ';
+                const pinnedText = langData.pinned || '置顶';
+                const readmoreText = langData.readmore || '阅读全文 →';
+
                 container.innerHTML = articles.map(art => {
+                    const title = typeof art.title === 'object' ? (art.title[lang] || art.title.zh) : art.title;
+                    const excerpt = typeof art.excerpt === 'object' ? (art.excerpt[lang] || art.excerpt.zh) : art.excerpt;
+                    const categoryDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[art.category]
+                        ? (window.CATEGORY_NAMES[art.category][lang] || window.CATEGORY_NAMES[art.category].zh)
+                        : art.category;
+
                     const pinHtml = art.pinned ? '<span class="pin-icon">📌</span> ' : '';
-                    const dateHtml = art.updated ? '更新 ' + art.updated : art.date;
+                    const dateHtml = art.updated ? updatedPrefix + art.updated : art.date;
                     const coverClass = art.cover || '';
-                    const coverStyle = art.image 
-                        ? `background-image: url('${art.image}'); background-size: cover; background-position: center;` 
+                    const coverStyle = art.image
+                        ? `background-image: url('${art.image}'); background-size: cover; background-position: center;`
                         : '';
+
                     return `
                         <a href="${art.link || '#'}" class="article-card">
                             <div class="article-cover">
                                 <div class="cover-img ${coverClass}" style="${coverStyle}"></div>
-                                ${art.pinned ? '<span class="cover-tag top" data-i18n="pinned">置顶</span>' : ''}
+                                ${art.pinned ? `<span class="cover-tag top">${pinnedText}</span>` : ''}
                                 <span class="cover-tag">${art.category}</span>
                             </div>
                             <div class="article-body">
-                                <div class="article-title">${pinHtml}${art.title}</div>
+                                <div class="article-title">${pinHtml}${title}</div>
                                 <div class="article-meta">
                                     <span>${art.date}</span>
                                     <span class="dot">·</span>
                                     <span>${dateHtml}</span>
                                     <span class="dot">·</span>
-                                    <span class="cat">${art.category}</span>
+                                    <span class="cat">${categoryDisplay}</span>
                                 </div>
-                                <div class="article-excerpt">${art.excerpt}</div>
+                                <div class="article-excerpt">${excerpt}</div>
                                 <div class="article-footer">
-                                    <span data-i18n="readmore">阅读全文 →</span>
+                                    <span>${readmoreText}</span>
                                 </div>
                             </div>
                         </a>
                     `;
                 }).join('');
             }
+
+            renderArticles();
+            window.addEventListener('languageChanged', renderArticles);
         })();
     </script>
 
