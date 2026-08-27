@@ -261,7 +261,7 @@
         ? `background-image: url('${art.image}'); background-size: cover; background-position: center;` 
         : '';
     return `
-        <a href="${art.link || '#'}" class="article-card" data-id="${art.id}">
+        <a href="${art.link || '#'}" class="article-card">
             <div class="article-cover">
                 <div class="cover-img ${coverClass}" style="${coverStyle}"></div>
                 ${art.pinned ? '<span class="cover-tag top">置顶</span>' : ''}

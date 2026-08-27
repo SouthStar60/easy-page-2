@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>简页 - 仓库</title>
+    <title>简页 - 关于</title>
     <link rel="stylesheet" href="main.css" />
     <link rel="stylesheet" href="article.css" />
 </head>
@@ -47,7 +47,7 @@
                     </svg>
                     主页
                 </a></li>
-            <li><a href="repo.html" class="active" data-nav="repo">
+            <li><a href="repo.html" data-nav="repo">
                     <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 8v13H3V8" />
                         <path d="M1 3h22v5H1z" />
@@ -74,13 +74,36 @@
 
     <main class="container">
         <div class="section-title">
-            📦 仓库项目
-            <span class="badge">开源</span>
+            关于
+            <span class="badge">标签</span>
         </div>
-        <div class="article-list" id="repoList"></div>
 
-        <div class="footer-note">
-            时间 <span>简页</span> &mdash; 用 ❤️ 构建
+        <!-- 使用 article-content 样式 -->
+        <div class="article-content">
+            <h1>h1</h1>
+            <p>
+                p
+            </p>
+            <h2>h2</h2>
+            <ul>
+                <li><strong>strong</strong>li</li>
+                <li><strong>strong</strong>li</li>
+            </ul>
+            <h2>h2</h2>
+            <p>
+                p <a href="https://example.com">a</a> p
+            </p>
+            <blockquote>
+                blockquote
+            </blockquote>
+            <pre><code>code</code></pre>
+            <p>
+                p
+            </p>
+            <hr />
+            <p style="text-align:center; color: var(--text-muted);">
+                <a href="https://example.com">联系</a>
+            </p>
         </div>
     </main>
 
@@ -94,33 +117,5 @@
 
     <script src="data.js"></script>
     <script src="main.js"></script>
-    <script>
-        (function() {
-            const repos = BLOG_DATA.repos;
-            const container = document.getElementById('repoList');
-            if (container) {
-    container.innerHTML = repos.map(repo => {
-        const coverStyle = repo.image 
-            ? `background-image: url('${repo.image}'); background-size: cover; background-position: center;` 
-            : `background: linear-gradient(135deg, #1a2a3a, #2d4a6a);`;
-        return `
-            <a href="${repo.link || '#'}" class="article-card">
-                <div class="article-cover" style="${coverStyle}">
-                    <span class="cover-tag">${repo.language}</span>
-                </div>
-                <div class="article-body">
-                    <div class="article-title">${repo.name}</div>
-                    <div class="article-excerpt" style="-webkit-line-clamp: 2;">${repo.description}</div>
-                    <div class="article-footer">
-                        <span>查看 →</span>
-                    </div>
-                </div>
-            </a>
-        `;
-    }).join('');
-}
-        })();
-    </script>
-
 </body>
 </html>

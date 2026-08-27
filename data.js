@@ -1,19 +1,6 @@
 const BLOG_DATA = {
     articles: [
         {
-            id: 1,
-            title: '标题',
-            pinned: true,
-            date: '发布时间',
-            updated: '更新时间',
-            category: '类型1',
-            excerpt: '简介0',
-            cover: 'cover-grad-1',
-            image: 'https://picsum.photos/seed/3/800/400',
-            link: '/'
-        },
-        {
-            id: 2,
             title: '2',
             pinned: false,
             date: '2026-08-15',
@@ -23,11 +10,22 @@ const BLOG_DATA = {
             cover: 'cover-grad-2',
             image: 'https://picsum.photos/seed/1/800/400',
             link: '/article/2.html'
+        },
+        {
+            title: '标题',
+            pinned: false,
+            date: '发布时间',
+            updated: '更新时间',
+            category: '类型1',
+            excerpt: '简介0',
+            cover: 'cover-grad-1',
+            image: 'https://picsum.photos/seed/3/800/400',
+            link: '/'
         }
+        
     ],
     repos: [
         {
-            id: 1,
             name: '1',
             description: '1',
             language: 'nolang',
