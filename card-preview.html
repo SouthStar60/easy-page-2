@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>卡片预览 · 按 ID</title>
+    <!-- 直接引用现有 CSS -->
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <link rel="stylesheet" href="/assets/css/article.css" />
+    <style>
+        /* 仅针对本页面的微调 */
+        .preview-section {
+            margin: 20px 0;
+        }
+        .preview-section .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .preview-section .controls label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .jumper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 2px 2px 2px 14px;
+            transition: border var(--transition);
+        }
+        .jumper:focus-within {
+            border-color: var(--accent);
+        }
+        .jumper input {
+            width: 70px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: var(--font);
+            padding: 8px 0;
+        }
+        .jumper input::placeholder {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        .jumper button {
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: background var(--transition);
+            font-family: var(--font);
+        }
+        .jumper button:hover {
+            background: #3a8aee;
+        }
+        .clear-btn {
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.70rem;
+            transition: all var(--transition);
+            font-family: var(--font);
+        }
+        .clear-btn:hover {
+            border-color: var(--text-muted);
+            color: var(--text-secondary);
+        }
+        .not-found {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border-light);
+        }
+        .not-found .icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body data-page="preview">
+
+    <!-- ===== 顶部导航（复用 index.html 的样式） ===== -->
+    <header class="topnav">
+        <div class="topnav-left">
+            <button class="topnav-menu" id="menuToggle" aria-label="菜单">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <span class="topnav-title" data-i18n="site_name">简页</span>
+        </div>
+        <div class="topnav-right">
+            <button class="theme-btn-header" id="themeToggle" aria-label="切换主题">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+            </button>
+            <button class="lang-btn-header" id="langToggle" aria-label="切换语言">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <span class="lang-label" id="langLabel">中</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== 抽屉菜单（复用） ===== -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <nav class="drawer" id="drawer">
+        <button class="drawer-close" id="drawerClose" aria-label="关闭菜单">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+        <ul class="drawer-nav">
+            <li><a href="/index.html" data-nav="home"><span data-i18n="nav.home">主页</span></a></li>
+            <li><a href="/repo.html" data-nav="repo"><span data-i18n="nav.repo">仓库</span></a></li>
+            <li><a href="/categories.html" data-nav="categories"><span data-i18n="nav.categories">分类</span></a></li>
+            <li><a href="/about.html" data-nav="about"><span data-i18n="nav.about">关于</span></a></li>
+        </ul>
+        
+        <div class="drawer-footer">
+            <span>临时测试</span>
+        </div>
+    </nav>
+
+    <!-- ===== 主内容 ===== -->
+    <main class="container">
+        <div class="section-title">
+            <span>📄 卡片预览（按 ID）</span>
+            <span class="badge">单卡</span>
+        </div>
+
+        <!-- 预览控制区 -->
+        <div class="preview-section">
+            <div class="controls">
+                <label for="idInput">文章 ID</label>
+                <div class="jumper">
+                    <input type="number" id="idInput" placeholder="输入 ID" min="1" value="1" />
+                    <button id="jumpBtn">查看</button>
+                </div>
+                <button class="clear-btn" id="clearBtn">清除</button>
+            </div>
+            <!-- 卡片将渲染到这里 -->
+            <div id="previewContainer"></div>
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="footer-note" data-i18n="footer_text">
+            时间 <span data-i18n="site_name">简页</span> &mdash; 用 ❤️ 构建
+        </div>
+    </main>
+
+    <!-- ===== 回到顶部 ===== -->
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== 直接导入现有 JS ===== -->
+    <script src="/assets/js/data.js"></script>
+    <script src="/assets/js/language.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- ===== 本页专属逻辑 ===== -->
+    <script>
+        (function() {
+            'use strict';
+
+            // 获取 DOM 元素
+            const container = document.getElementById('previewContainer');
+            const idInput = document.getElementById('idInput');
+            const jumpBtn = document.getElementById('jumpBtn');
+            const clearBtn = document.getElementById('clearBtn');
+
+            // 渲染函数（直接使用 main.js 中已有的 renderArticleCardById）
+            // 如果 main.js 未定义该函数，则在这里定义
+            function renderCard(id) {
+                if (!container) return;
+
+                // 若 main.js 已提供 renderArticleCardById，则直接调用
+                if (typeof window.renderArticleCardById === 'function') {
+                    window.renderArticleCardById(id, container);
+                    return;
+                }
+
+                // 否则，使用本地实现（复用 main.js 中的逻辑）
+                const articles = BLOG_DATA.articles || [];
+                const article = articles.find(a => a.id === Number(id));
+                const lang = window.getCurrentLang ? window.getCurrentLang() : 'zh';
+                const langData = window.LANG && window.LANG[lang] ? window.LANG[lang] : window.LANG['zh'];
+
+                if (!article) {
+                    container.innerHTML = `
+                        <div class="not-found">
+                            <div class="icon">🔍</div>
+                            <p>未找到 ID 为 <strong>${id}</strong> 的文章</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 构建卡片（与原有卡片样式完全一致）
+                const updatedPrefix = langData.updated_prefix || '更新 ';
+                const pinnedText = langData.pinned || '置顶';
+                const readmoreText = langData.readmore || '阅读全文 →';
+
+                const title = typeof article.title === 'object' ? (article.title[lang] || article.title.zh) : article.title;
+                const excerpt = typeof article.excerpt === 'object' ? (article.excerpt[lang] || article.excerpt.zh) : article.excerpt;
+                const categoryDisplay = window.CATEGORY_NAMES && window.CATEGORY_NAMES[article.category]
+                    ? (window.CATEGORY_NAMES[article.category][lang] || window.CATEGORY_NAMES[article.category].zh)
+                    : article.category;
+
+                const pinHtml = article.pinned ? '<span class="pin-icon">📌</span> ' : '';
+                const dateHtml = article.updated ? updatedPrefix + article.updated : article.date;
+                const coverClass = article.cover || '';
+                const coverStyle = article.image
+                    ? `background-image: url('${article.image}'); background-size: cover; background-position: center;`
+                    : '';
+
+                const cardHtml = `
+                    <a href="${article.link || '#'}" class="article-card">
+                        <div class="article-cover">
+                            <div class="cover-img ${coverClass}" style="${coverStyle}"></div>
+                            ${article.pinned ? `<span class="cover-tag top">${pinnedText}</span>` : ''}
+                            <span class="cover-tag">${article.category}</span>
+                        </div>
+                        <div class="article-body">
+                            <div class="article-title">${pinHtml}${title}</div>
+                            <div class="article-meta">
+                                <span>${article.date}</span>
+                                <span class="dot">·</span>
+                                <span>${dateHtml}</span>
+                                <span class="dot">·</span>
+                                <span class="cat">${categoryDisplay}</span>
+                            </div>
+                            <div class="article-excerpt">${excerpt}</div>
+                            <div class="article-footer">
+                                <span>${readmoreText}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                container.innerHTML = cardHtml;
+            }
+
+            // 事件绑定
+            jumpBtn.addEventListener('click', function() {
+                const id = parseInt(idInput.value, 10);
+                if (isNaN(id) || id < 1) {
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('请输入有效的文章 ID');
+                    } else {
+                        alert('请输入有效的文章 ID');
+                    }
+                    return;
+                }
+                renderCard(id);
+            });
+
+            clearBtn.addEventListener('click', function() {
+                container.innerHTML = '';
+                idInput.value = '';
+            });
+
+            // 回车触发查看
+            idInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    jumpBtn.click();
+                }
+            });
+
+            // 页面加载后默认显示 ID=1 的卡片
+            window.addEventListener('DOMContentLoaded', function() {
+                renderCard(1);
+            });
+
+            // 语言切换后重新渲染当前 ID
+            window.addEventListener('languageChanged', function() {
+                const currentId = idInput.value.trim();
+                if (currentId) {
+                    renderCard(parseInt(currentId, 10));
+                }
+            });
+
+        })();
+    </script>
+
+</body>
+</html>

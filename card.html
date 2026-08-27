@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>简页 - 关于</title>
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <link rel="stylesheet" href="/assets/css/article.css" />
+</head>
+<body data-page="about">
+
+    <header class="topnav">
+        <div class="topnav-left">
+            <button class="topnav-menu" id="menuToggle" aria-label="菜单">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <span class="topnav-title" data-i18n="site_name">简页</span>
+        </div>
+        <div class="topnav-right">
+            <button class="theme-btn-header" id="themeToggle" aria-label="切换主题">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+            </button>
+            <button class="lang-btn-header" id="langToggle" aria-label="切换语言">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <span class="lang-label" id="langLabel"></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <nav class="drawer" id="drawer">
+        <button class="drawer-close" id="drawerClose" aria-label="关闭菜单">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+        <ul class="drawer-nav">
+            <li><a href="/index.html" data-nav="home"><span data-i18n="nav.home">主页</span></a></li>
+            <li><a href="/repo.html" data-nav="repo"><span data-i18n="nav.repo">仓库</span></a></li>
+            <li><a href="/categories.html" data-nav="categories"><span data-i18n="nav.categories">分类</span></a></li>
+            <li><a href="/about.html" data-nav="about"><span data-i18n="nav.about">关于</span></a></li>
+        </ul>
+        
+        <div class="drawer-footer">
+            <span>测试使用</span>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="section-title">
+            <span data-i18n="nav.card">卡片</span>
+            <span class="badge" data-i18n="test-use">测试使用</span>
+        </div>
+        
+        <div class="card-placeholder" data-id="3"></div>
+
+        <div class="article-content">
+            <h1>h1</h1>
+            <p>p</p>
+            <h2>h2</h2>
+            <ul>
+                <li><strong>strong</strong>li</li>
+                <li><strong>strong</strong>li</li>
+            </ul>
+            <h2>h2</h2>
+            <p>p <a href="https://example.com">a</a> p</p>
+            <blockquote>blockquote</blockquote>
+            <pre><code>code</code></pre>
+            <p>p</p>
+            <hr />
+            <p style="text-align:center; color: var(--text-muted);">
+                <a href="https://example.com" data-i18n="contact">联系</a>
+            </p>
+        </div>
+    </main>
+
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/assets/js/data.js"></script>
+    <script src="/assets/js/language.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/card.js"></script>
+</body>
+</html>
