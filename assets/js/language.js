@@ -1,4 +1,3 @@
-// language.js
 const LANG = {
     'zh': {
         'nav.home': '主页',
@@ -7,7 +6,6 @@ const LANG = {
         'nav.about': '关于',
         'theme.dark': '深色',
         'theme.light': '浅色',
-        // 已删除 'lang.zh' 和 'lang.en'
         'readmore': '阅读全文 →',
         'view': '查看 →',
         'articles': '文章',
@@ -33,7 +31,6 @@ const LANG = {
         'nav.about': 'About',
         'theme.dark': 'Dark',
         'theme.light': 'Light',
-        // 已删除 'lang.zh' 和 'lang.en'
         'readmore': 'Read More →',
         'view': 'View →',
         'articles': 'Articles',
@@ -54,7 +51,6 @@ const LANG = {
     }
 };
 
-// 分类名称翻译（可选）
 const CATEGORY_NAMES = {
     'javascript': { zh: 'JavaScript', en: 'JavaScript' },
     'css': { zh: 'CSS', en: 'CSS' },
@@ -63,7 +59,6 @@ const CATEGORY_NAMES = {
     '性能': { zh: '性能', en: 'Performance' }
 };
 
-// 编程语言名称翻译（可选）
 const LANGUAGE_NAMES = {
     'TypeScript': { zh: 'TypeScript', en: 'TypeScript' },
     'Rust': { zh: 'Rust', en: 'Rust' },
@@ -71,16 +66,10 @@ const LANGUAGE_NAMES = {
     'Go': { zh: 'Go', en: 'Go' }
 };
 
-// ---- 独立语言菜单配置 ----
-// 只有在此列出的语言会出现在切换菜单中，名称使用该语言的自称
 const LANG_MENU_ITEMS = {
     'zh': '中文',
     'en': 'English'
-    // 如需添加更多语言，在此添加，例如：
-    // 'ja': '日本語',
-    // 'fr': 'Français'
 };
-// ---- 配置结束 ----
 
 function getCurrentLang() {
     let lang = localStorage.getItem('blog-lang');
@@ -91,7 +80,6 @@ function getCurrentLang() {
     return defaultLang;
 }
 
-// 切换语言：保存 → 刷新 → 用 sessionStorage 标记变更
 function setLanguage(lang) {
     if (!LANG[lang]) return;
     localStorage.setItem('blog-lang', lang);
@@ -99,7 +87,6 @@ function setLanguage(lang) {
     location.reload();
 }
 
-// 应用语言：只更新 data-i18n 元素，不碰按钮和标题
 function applyLanguage() {
     const lang = getCurrentLang();
     const langData = LANG[lang];
@@ -119,7 +106,6 @@ function applyLanguage() {
     });
 }
 
-// 显示提示（兼容 main.js 的 showToast）
 function showLangToast(message) {
     if (typeof window.showToast === 'function') {
         window.showToast(message);
@@ -128,7 +114,6 @@ function showLangToast(message) {
     }
 }
 
-// 初始化：获取语言、应用翻译、检测变更并显示提示
 function initLanguage() {
     const lang = getCurrentLang();
     applyLanguage();
@@ -136,9 +121,7 @@ function initLanguage() {
     const changed = sessionStorage.getItem('lang-changed');
     if (changed === 'true') {
         sessionStorage.removeItem('lang-changed');
-        // 从独立菜单配置中获取语言名称
         const langName = LANG_MENU_ITEMS[lang] || lang.toUpperCase();
-        // 统一只显示语言名称，简洁明了
         const msg = langName;
         setTimeout(function() {
             showLangToast(msg);
@@ -146,7 +129,6 @@ function initLanguage() {
     }
 }
 
-// 暴露全局
 window.LANG = LANG;
 window.CATEGORY_NAMES = CATEGORY_NAMES;
 window.LANGUAGE_NAMES = LANGUAGE_NAMES;

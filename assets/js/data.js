@@ -1,4 +1,3 @@
-// data.js
 const BLOG_DATA = {
     articles: [
         {

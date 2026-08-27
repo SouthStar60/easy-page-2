@@ -14,7 +14,6 @@
     let isDark = true;
     let langMenuVisible = false;
 
-    // ---- Drawer ----
     function openDrawer() {
         drawer.classList.add('open');
         overlay.classList.add('open');
@@ -30,7 +29,6 @@
     if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
     if (overlay) overlay.addEventListener('click', closeDrawer);
 
-    // ---- Back to Top ----
     window.addEventListener('scroll', function() {
         if (backTop) {
             if (window.scrollY > 420) {
@@ -46,13 +44,12 @@
         });
     }
 
-    // ---- Theme ----
     function setTheme(dark) {
         isDark = dark;
         document.body.classList.toggle('light', !dark);
         try {
             localStorage.setItem('blog-theme', dark ? 'dark' : 'light');
-        } catch (e) { /* ignore */ }
+        } catch (e) { }
 
         if (themeToggle) {
             const svg = dark ?
@@ -69,7 +66,7 @@
             if (stored === 'light' || stored === 'dark') {
                 saved = stored;
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { }
         setTheme(saved === 'dark');
     }
 
@@ -80,7 +77,6 @@
         });
     }
 
-    // ---- Language Menu (修改后) ----
     function createLangMenu() {
         const menu = document.createElement('div');
         menu.id = 'langMenu';
@@ -100,13 +96,11 @@
             flex-direction: column;
         `;
 
-        // 从独立配置中读取菜单项，若未定义则使用默认（兼容旧逻辑）
         const menuItems = window.LANG_MENU_ITEMS || { 'zh': '中文', 'en': 'English' };
         const langCodes = Object.keys(menuItems);
 
         langCodes.forEach(code => {
             const btn = document.createElement('button');
-            // 直接使用配置中的显示名称
             const displayName = menuItems[code] || code.toUpperCase();
 
             btn.textContent = displayName;
@@ -166,7 +160,6 @@
         });
     }
 
-    // ---- Toast ----
     function showToast(message) {
         if (!toast) return;
         toast.textContent = message;
@@ -177,7 +170,6 @@
         }, 2200);
     }
 
-    // ---- Keyboard: ESC ----
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             if (drawer && drawer.classList.contains('open')) closeDrawer();
@@ -185,7 +177,6 @@
         }
     });
 
-    // ---- Init ----
     initTheme();
     window.initLanguage();
 
