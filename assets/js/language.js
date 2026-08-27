@@ -22,7 +22,11 @@ const LANG = {
         'footer_text': '时间 {site} — 用 ❤️ 构建',
         'site_name': '简页',
         'updated_prefix': '更新 ',
-        'pinned': '置顶'
+        'pinned': '置顶',
+        // 新增
+        'show': '显示',
+        'total_prefix': '（共 ',
+        'total_suffix': ' 篇）'
     },
     'en': {
         'nav.home': 'Home',
@@ -46,7 +50,11 @@ const LANG = {
         'footer_text': '{site} — Built with ❤️',
         'site_name': 'Jianye',
         'updated_prefix': 'Updated ',
-        'pinned': 'Pinned'
+        'pinned': 'Pinned',
+        // 新增
+        'show': 'Show',
+        'total_prefix': ' (',
+        'total_suffix': ' total)'
     }
 };
 
@@ -88,13 +96,23 @@ function applyLanguage() {
     const lang = getCurrentLang();
     const langData = LANG[lang];
     if (!langData) return;
+
+    // 处理所有带 data-i18n 的元素
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         let text = langData[key];
         if (text === undefined) return;
         text = text.replace(/\{site\}/g, langData.site_name || 'Jianye');
-        el.textContent = text;
+
+        // 如果是 input 或 textarea，设置 placeholder
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.placeholder = text;
+        } else {
+            el.textContent = text;
+        }
     });
+
+    // 更新页面 title
     const titleEl = document.querySelector('title');
     if (titleEl) {
         const siteName = langData.site_name || 'Jianye';
