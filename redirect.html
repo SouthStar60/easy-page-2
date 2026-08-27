@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>跳转中…</title>
+    <!-- 直接复用现有样式 -->
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <link rel="stylesheet" href="/assets/css/article.css" />
+    <style>
+        /* 仅做居中布局，不新增样式 */
+        body {
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg-primary);
+        }
+        .redirect-container {
+            max-width: 480px;
+            width: 100%;
+            padding: 20px;
+            margin: 0 auto;
+        }
+        /* 禁用卡片点击，只通过按钮跳转（仅当显示卡片时） */
+        .article-card {
+            cursor: default;
+            pointer-events: none;
+        }
+        /* 隐藏卡片自带的“阅读全文” */
+        .article-card .article-footer {
+            display: none;
+        }
+        /* 跳转按钮 */
+        .redirect-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background var(--transition);
+            font-family: var(--font);
+        }
+        .redirect-btn:hover {
+            background: #3a8aee;
+        }
+        /* 错误 / 提示信息 */
+        .not-found {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .not-found .icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .not-found .link-display {
+            word-break: break-all;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            margin-top: 8px;
+            border: 1px solid var(--border-light);
+        }
+        .loading-msg {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        /* 直接跳转时隐藏卡片区域，避免闪烁 */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <!-- 卡片容器（默认显示，直接跳转时隐藏） -->
+        <div id="cardContainer"></div>
+        <!-- 跳转按钮（默认隐藏，只有在显示卡片模式才出现） -->
+        <a href="#" id="redirectLink" class="redirect-btn" style="display:none;">继续前往 →</a>
+        <!-- 加载提示（直接跳转时显示） -->
+        <div id="loadingMsg" class="loading-msg hidden">正在跳转…</div>
+    </div>
+
+    <!-- 引入依赖 -->
+    <script src="/assets/js/data.js"></script>
+    <script src="/assets/js/language.js"></script>
+    <script src="/assets/js/card.js"></script>
+
+    <script>
+        (function() {
+            'use strict';
+
+            var container = document.getElementById('cardContainer');
+            var redirectBtn = document.getElementById('redirectLink');
+            var loadingMsg = document.getElementById('loadingMsg');
+
+            // 获取 URL 参数
+            var urlParams = new URLSearchParams(window.location.search);
+            var id = urlParams.get('id');
+            var link = urlParams.get('link');          // 新增：常规链接
+            var directJump = urlParams.get('direct-jump'); // '1' 直接跳转，其他或缺失为点击跳转
+
+            // ---- 优先处理 link 参数 ----
+            if (link && link.trim() !== '') {
+                // 如果 directJump === '1'，直接跳转
+                if (directJump === '1') {
+                    container.classList.add('hidden');
+                    redirectBtn.style.display = 'none';
+                    loadingMsg.classList.remove('hidden');
+                    window.location.href = link;
+                    return;
+                } else {
+                    // 显示链接信息和点击跳转按钮
+                    container.classList.remove('hidden');
+                    loadingMsg.classList.add('hidden');
+
+                    // 在容器中显示链接信息（复用 not-found 样式）
+                    container.innerHTML = `
+                        <div class="not-found">
+                            <div class="icon">🔗</div>
+                            <p>即将跳转到：</p>
+                            <div class="link-display">${link}</div>
+                        </div>
+                    `;
+
+                    // 设置按钮
+                    redirectBtn.href = link;
+                    redirectBtn.style.display = 'block';
+                    return;
+                }
+            }
+
+            // ---- 处理 id 参数（原有逻辑） ----
+            if (!id) {
+                container.innerHTML = `
+                    <div class="not-found">
+                        <div class="icon">⚠️</div>
+                        <p>缺少文章 ID 或跳转链接</p>
+                        <p style="font-size:0.8rem;margin-top:8px;">请使用 ?id=数字 或 ?link=网址 访问</p>
+                    </div>
+                `;
+                redirectBtn.style.display = 'none';
+                loadingMsg.classList.add('hidden');
+                return;
+            }
+
+            var articles = BLOG_DATA.articles || [];
+            var article = articles.find(function(a) { return a.id === Number(id); });
+
+            if (!article) {
+                container.innerHTML = `
+                    <div class="not-found">
+                        <div class="icon">🔍</div>
+                        <p>未找到 ID 为 ${id} 的文章</p>
+                    </div>
+                `;
+                redirectBtn.style.display = 'none';
+                loadingMsg.classList.add('hidden');
+                return;
+            }
+
+            if (!article.link) {
+                container.innerHTML = `
+                    <div class="not-found">
+                        <div class="icon">🔗</div>
+                        <p>该文章没有配置跳转链接</p>
+                    </div>
+                `;
+                redirectBtn.style.display = 'none';
+                loadingMsg.classList.add('hidden');
+                return;
+            }
+
+            // 文章存在且有效
+            if (directJump === '1') {
+                container.classList.add('hidden');
+                redirectBtn.style.display = 'none';
+                loadingMsg.classList.remove('hidden');
+                window.location.href = article.link;
+            } else {
+                container.classList.remove('hidden');
+                loadingMsg.classList.add('hidden');
+
+                if (typeof renderArticleCardById === 'function') {
+                    renderArticleCardById(id, container);
+                } else {
+                    container.innerHTML = '<div style="color:red;text-align:center;padding:30px 0;">卡片渲染器未加载</div>';
+                    redirectBtn.style.display = 'none';
+                    return;
+                }
+
+                redirectBtn.href = article.link;
+                redirectBtn.style.display = 'block';
+            }
+
+        })();
+    </script>
+</body>
+</html>
