@@ -803,6 +803,49 @@ img {
     color: var(--accent);
 }
 
+/* 方形仅图标按钮（主题 & 语言） */
+.theme-btn-header,
+.lang-btn-header {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 6px; /* 方形圆角 */
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font);
+    flex-shrink: 0;
+}
+.theme-btn-header:hover,
+.theme-btn-header:active,
+.lang-btn-header:hover,
+.lang-btn-header:active {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+.theme-btn-header svg,
+.lang-btn-header svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+.lang-btn-header .lang-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 2px;
+    color: currentColor;
+}
+
 @media (max-width: 420px) {
     .container { padding: 0 12px; }
     .topnav { padding: 8px 12px; height: 50px; }
