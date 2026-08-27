@@ -7,8 +7,7 @@ const LANG = {
         'nav.about': '关于',
         'theme.dark': '深色',
         'theme.light': '浅色',
-        'lang.zh': '中文',
-        'lang.en': 'English',
+        // 已删除 'lang.zh' 和 'lang.en'
         'readmore': '阅读全文 →',
         'view': '查看 →',
         'articles': '文章',
@@ -34,8 +33,7 @@ const LANG = {
         'nav.about': 'About',
         'theme.dark': 'Dark',
         'theme.light': 'Light',
-        'lang.zh': 'Chinese',
-        'lang.en': 'English',
+        // 已删除 'lang.zh' 和 'lang.en'
         'readmore': 'Read More →',
         'view': 'View →',
         'articles': 'Articles',
@@ -56,6 +54,7 @@ const LANG = {
     }
 };
 
+// 分类名称翻译（可选）
 const CATEGORY_NAMES = {
     'javascript': { zh: 'JavaScript', en: 'JavaScript' },
     'css': { zh: 'CSS', en: 'CSS' },
@@ -64,12 +63,24 @@ const CATEGORY_NAMES = {
     '性能': { zh: '性能', en: 'Performance' }
 };
 
+// 编程语言名称翻译（可选）
 const LANGUAGE_NAMES = {
     'TypeScript': { zh: 'TypeScript', en: 'TypeScript' },
     'Rust': { zh: 'Rust', en: 'Rust' },
     'CSS': { zh: 'CSS', en: 'CSS' },
     'Go': { zh: 'Go', en: 'Go' }
 };
+
+// ---- 独立语言菜单配置 ----
+// 只有在此列出的语言会出现在切换菜单中，名称使用该语言的自称
+const LANG_MENU_ITEMS = {
+    'zh': '中文',
+    'en': 'English'
+    // 如需添加更多语言，在此添加，例如：
+    // 'ja': '日本語',
+    // 'fr': 'Français'
+};
+// ---- 配置结束 ----
 
 function getCurrentLang() {
     let lang = localStorage.getItem('blog-lang');
@@ -108,12 +119,11 @@ function applyLanguage() {
     });
 }
 
-// 显示提示（兼容 main.js 的 showToast，若不存在则用 alert 兜底）
+// 显示提示（兼容 main.js 的 showToast）
 function showLangToast(message) {
     if (typeof window.showToast === 'function') {
         window.showToast(message);
     } else {
-        // 如果 main.js 还没加载，用简单弹窗
         alert(message);
     }
 }
@@ -123,20 +133,13 @@ function initLanguage() {
     const lang = getCurrentLang();
     applyLanguage();
 
-    // 检测是否刚切换了语言
     const changed = sessionStorage.getItem('lang-changed');
     if (changed === 'true') {
         sessionStorage.removeItem('lang-changed');
-        // 构造提示信息
-        const langNameKey = 'lang.' + lang;  // 例如 'lang.zh'
-        let langName = LANG[lang][langNameKey] || lang.toUpperCase();
-        let msg;
-        if (lang === 'zh') {
-            msg = '已切换到 ' + langName;
-        } else {
-            msg = 'Switched to ' + langName;
-        }
-        // 延迟执行，确保 DOM 和 toast 元素已渲染
+        // 从独立菜单配置中获取语言名称
+        const langName = LANG_MENU_ITEMS[lang] || lang.toUpperCase();
+        // 统一只显示语言名称，简洁明了
+        const msg = langName;
         setTimeout(function() {
             showLangToast(msg);
         }, 100);
@@ -147,6 +150,7 @@ function initLanguage() {
 window.LANG = LANG;
 window.CATEGORY_NAMES = CATEGORY_NAMES;
 window.LANGUAGE_NAMES = LANGUAGE_NAMES;
+window.LANG_MENU_ITEMS = LANG_MENU_ITEMS;
 window.setLanguage = setLanguage;
 window.getCurrentLang = getCurrentLang;
 window.initLanguage = initLanguage;

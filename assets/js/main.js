@@ -80,7 +80,7 @@
         });
     }
 
-    // ---- Language Menu ----
+    // ---- Language Menu (修改后) ----
     function createLangMenu() {
         const menu = document.createElement('div');
         menu.id = 'langMenu';
@@ -99,50 +99,38 @@
             display: none;
             flex-direction: column;
         `;
-        const zh = document.createElement('button');
-        zh.textContent = '中文';
-        zh.style.cssText = `
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 8px 20px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-family: var(--font);
-            transition: background 0.2s;
-        `;
-        zh.addEventListener('mouseenter', () => zh.style.background = 'var(--accent-dim)');
-        zh.addEventListener('mouseleave', () => zh.style.background = 'transparent');
-        zh.addEventListener('click', function() {
-            window.setLanguage('zh');
-            hideLangMenu();
-            showToast('已切换到中文');
+
+        // 从独立配置中读取菜单项，若未定义则使用默认（兼容旧逻辑）
+        const menuItems = window.LANG_MENU_ITEMS || { 'zh': '中文', 'en': 'English' };
+        const langCodes = Object.keys(menuItems);
+
+        langCodes.forEach(code => {
+            const btn = document.createElement('button');
+            // 直接使用配置中的显示名称
+            const displayName = menuItems[code] || code.toUpperCase();
+
+            btn.textContent = displayName;
+            btn.style.cssText = `
+                background: transparent;
+                border: none;
+                color: var(--text-primary);
+                padding: 8px 20px;
+                text-align: left;
+                cursor: pointer;
+                font-size: 0.9rem;
+                font-family: var(--font);
+                transition: background 0.2s;
+            `;
+            btn.addEventListener('mouseenter', () => btn.style.background = 'var(--accent-dim)');
+            btn.addEventListener('mouseleave', () => btn.style.background = 'transparent');
+            btn.addEventListener('click', function() {
+                window.setLanguage(code);
+                hideLangMenu();
+            });
+
+            menu.appendChild(btn);
         });
 
-        const en = document.createElement('button');
-        en.textContent = 'English';
-        en.style.cssText = `
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 8px 20px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-family: var(--font);
-            transition: background 0.2s;
-        `;
-        en.addEventListener('mouseenter', () => en.style.background = 'var(--accent-dim)');
-        en.addEventListener('mouseleave', () => en.style.background = 'transparent');
-        en.addEventListener('click', function() {
-            window.setLanguage('en');
-            hideLangMenu();
-            showToast('Switched to English');
-        });
-
-        menu.appendChild(zh);
-        menu.appendChild(en);
         document.body.appendChild(menu);
         return menu;
     }
