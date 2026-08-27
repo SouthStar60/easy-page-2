@@ -23,7 +23,6 @@ const LANG = {
         'site_name': '简页',
         'updated_prefix': '更新 ',
         'pinned': '置顶',
-        // 新增
         'show': '显示',
         'total_prefix': '（共 ',
         'total_suffix': ' 篇）'
@@ -51,7 +50,6 @@ const LANG = {
         'site_name': 'Jianye',
         'updated_prefix': 'Updated ',
         'pinned': 'Pinned',
-        // 新增
         'show': 'Show',
         'total_prefix': ' (',
         'total_suffix': ' total)'
@@ -82,60 +80,70 @@ function getCurrentLang() {
     return defaultLang;
 }
 
+// 切换语言：保存 → 刷新 → 用 sessionStorage 标记变更
 function setLanguage(lang) {
     if (!LANG[lang]) return;
     localStorage.setItem('blog-lang', lang);
-    // 可选：快速更新按钮文本，但刷新后会重置，保留也无妨
-    const langLabel = document.querySelector('.lang-btn-header .lang-label');
-    if (langLabel) langLabel.textContent = lang === 'zh' ? '中' : 'EN';
-    // 刷新页面，使所有内容重新加载并应用新语言
+    sessionStorage.setItem('lang-changed', 'true');
     location.reload();
 }
 
+// 应用语言：只更新 data-i18n 元素，不碰按钮和标题
 function applyLanguage() {
     const lang = getCurrentLang();
     const langData = LANG[lang];
     if (!langData) return;
 
-    // 处理所有带 data-i18n 的元素
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         let text = langData[key];
         if (text === undefined) return;
         text = text.replace(/\{site\}/g, langData.site_name || 'Jianye');
 
-        // 如果是 input 或 textarea，设置 placeholder
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
             el.placeholder = text;
         } else {
             el.textContent = text;
         }
     });
+}
 
-    // 更新页面 title
-    const titleEl = document.querySelector('title');
-    if (titleEl) {
-        const siteName = langData.site_name || 'Jianye';
-        const pageKey = document.body.dataset.page || 'home';
-        const pageMap = {
-            'home': langData.nav.home || 'Home',
-            'repo': langData.nav.repo || 'Repos',
-            'categories': langData.nav.categories || 'Categories',
-            'about': langData.nav.about || 'About'
-        };
-        const pageName = pageMap[pageKey] || '';
-        titleEl.textContent = pageName ? `${siteName} - ${pageName}` : siteName;
+// 显示提示（兼容 main.js 的 showToast，若不存在则用 alert 兜底）
+function showLangToast(message) {
+    if (typeof window.showToast === 'function') {
+        window.showToast(message);
+    } else {
+        // 如果 main.js 还没加载，用简单弹窗
+        alert(message);
     }
 }
 
+// 初始化：获取语言、应用翻译、检测变更并显示提示
 function initLanguage() {
-    getCurrentLang();
-    applyLanguage();
     const lang = getCurrentLang();
-    const langLabel = document.querySelector('.lang-btn-header .lang-label');
-    if (langLabel) langLabel.textContent = lang === 'zh' ? '中' : 'EN';
+    applyLanguage();
+
+    // 检测是否刚切换了语言
+    const changed = sessionStorage.getItem('lang-changed');
+    if (changed === 'true') {
+        sessionStorage.removeItem('lang-changed');
+        // 构造提示信息
+        const langNameKey = 'lang.' + lang;  // 例如 'lang.zh'
+        let langName = LANG[lang][langNameKey] || lang.toUpperCase();
+        let msg;
+        if (lang === 'zh') {
+            msg = '已切换到 ' + langName;
+        } else {
+            msg = 'Switched to ' + langName;
+        }
+        // 延迟执行，确保 DOM 和 toast 元素已渲染
+        setTimeout(function() {
+            showLangToast(msg);
+        }, 100);
+    }
 }
 
+// 暴露全局
 window.LANG = LANG;
 window.CATEGORY_NAMES = CATEGORY_NAMES;
 window.LANGUAGE_NAMES = LANGUAGE_NAMES;
