@@ -6,6 +6,21 @@ const LANG = {
         'nav.about': '关于',
         'theme.dark': '深色',
         'theme.light': '浅色',
+        'redirect.jump_to': '继续前往 →',
+        'redirect.jumping': '正在跳转…',
+        'redirect.unsafe_protocol': '不支持的链接协议',
+        'redirect.about_to_jump': '即将跳转到：',
+        'redirect.missing_param': '缺少文章 ID 或跳转链接',
+        'redirect.missing_param_hint': '请使用 ?id=数字 或 ?link=网址 访问',
+        'redirect.invalid_id': 'ID 格式不正确',
+        'redirect.invalid_id_hint': 'ID 必须为正整数，当前值：',
+        'redirect.article_not_found_prefix': '未找到 ID 为 ',
+        'redirect.article_not_found_suffix': ' 的文章',
+        'redirect.no_link': '该文章没有配置跳转链接',
+        'redirect.unsafe_link': '该文章配置的链接协议不安全',
+        'redirect.card_renderer_missing': '卡片渲染器未加载',
+        'theme.toast.dark': '已切换到深色模式',
+        'theme.toast.light': '已切换到浅色模式',
         'readmore': '阅读全文 →',
         'view': '查看 →',
         'articles': '文章',
@@ -22,7 +37,8 @@ const LANG = {
         'pinned': '置顶',
         'show': '显示',
         'total_prefix': '（共 ',
-        'total_suffix': ' 篇）'
+        'total_suffix': ' 篇）',
+        'contact': '联系',
     },
     'en': {
         'nav.home': 'Home',
@@ -47,7 +63,23 @@ const LANG = {
         'pinned': 'Pinned',
         'show': 'Show',
         'total_prefix': ' (',
-        'total_suffix': ' total)'
+        'total_suffix': ' total)',
+        'redirect.jump_to': 'Jump to →',
+        'redirect.jumping': 'Jumping…',
+        'redirect.unsafe_protocol': 'Unsupported link protocol',
+        'redirect.about_to_jump': 'Redirecting to:',
+        'redirect.missing_param': 'Missing article ID or redirect link',
+        'redirect.missing_param_hint': 'Please use ?id=number or ?link=url',
+        'redirect.invalid_id': 'Invalid ID format',
+        'redirect.invalid_id_hint': 'ID must be a positive integer. Current value: ',
+        'redirect.article_not_found_prefix': 'Article with ID ',
+        'redirect.article_not_found_suffix': ' not found',
+        'redirect.no_link': 'This article has no redirect link configured',
+        'redirect.unsafe_link': 'The configured link protocol is unsafe',
+        'redirect.card_renderer_missing': 'Card renderer not loaded',
+        'theme.toast.dark': 'Switched to dark mode',
+        'theme.toast.light': 'Switched to light mode',
+        'contact': 'Contact',
     }
 };
 
@@ -123,7 +155,7 @@ function initLanguage() {
         sessionStorage.removeItem('lang-changed');
         const langName = LANG_MENU_ITEMS[lang] || lang.toUpperCase();
         const msg = langName;
-        setTimeout(function() {
+        setTimeout(function () {
             showLangToast(msg);
         }, 100);
     }

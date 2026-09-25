@@ -16,7 +16,7 @@ const BLOG_DATA = {
             },
             cover: 'cover-grad-1',
             image: 'https://picsum.photos/seed/js/800/400',
-            link: '/article/1.html'
+            link: 'redirect.html'
         },
         {
             id: 2,

@@ -1,4 +1,4 @@
-(function() {
+(function () {
     'use strict';
 
     const drawer = document.getElementById('drawer');
@@ -29,7 +29,7 @@
     if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
     if (overlay) overlay.addEventListener('click', closeDrawer);
 
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
         if (backTop) {
             if (window.scrollY > 420) {
                 backTop.classList.add('visible');
@@ -39,7 +39,7 @@
         }
     });
     if (backTop) {
-        backTop.addEventListener('click', function() {
+        backTop.addEventListener('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
@@ -71,9 +71,18 @@
     }
 
     if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
+        themeToggle.addEventListener('click', function () {
             setTheme(!isDark);
-            showToast(isDark ? '切换到深色模式' : '切换到浅色模式');
+
+            // 从语言包取文案，取不到就兜底
+            var lang = (typeof window.getCurrentLang === 'function') ? window.getCurrentLang() : 'zh';
+            var langData = (window.LANG && window.LANG[lang]) ? window.LANG[lang] : (window.LANG && window.LANG['zh']) || {};
+            var fallback = isDark ? '已切换到深色模式' : '已切换到浅色模式';
+            var msg = isDark
+                ? (langData['theme.toast.dark'] || fallback)
+                : (langData['theme.toast.light'] || fallback);
+
+            showToast(msg);
         });
     }
 
@@ -117,7 +126,7 @@
             `;
             btn.addEventListener('mouseenter', () => btn.style.background = 'var(--accent-dim)');
             btn.addEventListener('mouseleave', () => btn.style.background = 'transparent');
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 window.setLanguage(code);
                 hideLangMenu();
             });
@@ -153,7 +162,7 @@
 
     if (langToggle) {
         langToggle.addEventListener('click', toggleLangMenu);
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (langMenuVisible && !langMenu.contains(e.target) && e.target !== langToggle) {
                 hideLangMenu();
             }
@@ -165,12 +174,12 @@
         toast.textContent = message;
         toast.classList.add('show');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(function() {
+        toastTimer = setTimeout(function () {
             toast.classList.remove('show');
         }, 2200);
     }
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             if (drawer && drawer.classList.contains('open')) closeDrawer();
             if (langMenuVisible) hideLangMenu();

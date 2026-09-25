@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -17,21 +18,25 @@
             min-height: 100vh;
             background: var(--bg-primary);
         }
+
         .redirect-container {
             max-width: 480px;
             width: 100%;
             padding: 20px;
             margin: 0 auto;
         }
+
         /* 禁用卡片点击，只通过按钮跳转（仅当显示卡片时） */
         .article-card {
             cursor: default;
             pointer-events: none;
         }
+
         /* 隐藏卡片自带的“阅读全文” */
         .article-card .article-footer {
             display: none;
         }
+
         /* 跳转按钮 */
         .redirect-btn {
             display: block;
@@ -50,19 +55,23 @@
             transition: background var(--transition);
             font-family: var(--font);
         }
+
         .redirect-btn:hover {
             background: #3a8aee;
         }
+
         /* 错误 / 提示信息 */
         .not-found {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
         }
+
         .not-found .icon {
             font-size: 3rem;
             margin-bottom: 10px;
         }
+
         .not-found .link-display {
             word-break: break-all;
             font-size: 0.9rem;
@@ -74,141 +83,241 @@
             margin-top: 8px;
             border: 1px solid var(--border-light);
         }
+
         .loading-msg {
             text-align: center;
             padding: 40px 0;
             color: var(--text-muted);
             font-size: 1.1rem;
         }
+
         /* 直接跳转时隐藏卡片区域，避免闪烁 */
         .hidden {
             display: none;
         }
     </style>
 </head>
+
 <body>
     <div class="redirect-container">
         <!-- 卡片容器（默认显示，直接跳转时隐藏） -->
         <div id="cardContainer"></div>
         <!-- 跳转按钮（默认隐藏，只有在显示卡片模式才出现） -->
-        <a href="#" id="redirectLink" class="redirect-btn" style="display:none;">继续前往 →</a>
+        <a href="#" id="redirectLink" class="redirect-btn" style="display:none;" data-i18n="redirect.jump_to">继续前往 →</a>
         <!-- 加载提示（直接跳转时显示） -->
-        <div id="loadingMsg" class="loading-msg hidden">正在跳转…</div>
+        <div id="loadingMsg" class="loading-msg hidden" data-i18n="redirect.jumping">正在跳转…</div>
     </div>
 
     <!-- 引入依赖 -->
     <script src="assets/js/data.js"></script>
     <script src="assets/js/language.js"></script>
     <script src="assets/js/card.js"></script>
+    <script src="assets/js/main.js"></script>
 
     <script>
-        (function() {
+        (function () {
             'use strict';
 
             var container = document.getElementById('cardContainer');
             var redirectBtn = document.getElementById('redirectLink');
             var loadingMsg = document.getElementById('loadingMsg');
 
-            // 获取 URL 参数
+            // ---------- 语言辅助 ----------
+            var lang = (typeof window.getCurrentLang === 'function') ? window.getCurrentLang() : 'zh';
+            var langData = (window.LANG && window.LANG[lang]) ? window.LANG[lang] : (window.LANG && window.LANG['zh']) || {};
+            function t(key, fallback) {
+                return langData[key] !== undefined ? langData[key] : (fallback !== undefined ? fallback : key);
+            }
+
+            // 页面标题
+            document.title = t('redirect.title', '跳转中…');
+
+            // ---------- 工具函数 ----------
+
+            // 1. 补全协议：baidu.com -> https://baidu.com
+            function normalizeUrl(url) {
+                if (!url) return '';
+                url = String(url).trim();
+                if (url === '') return '';
+
+                // 已有协议（http:, https:, mailto:, tel: 等）或协议相对（//）
+                if (/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('//')) {
+                    return url;
+                }
+                // 站内相对路径 / 锚点 / 查询字符串
+                if (/^(\/|\.\/|\.\.\/|\?|#)/.test(url)) {
+                    return url;
+                }
+                // 本地文件名（.html / .htm / .php 等），保持原样
+                if (/\.(html?|php|asp|jsp|aspx|shtml)([?#].*)?$/i.test(url)) {
+                    return url;
+                }
+                // 看起来像裸域名（第一段含点），补 https
+                var firstSlash = url.indexOf('/');
+                var firstPart = firstSlash === -1 ? url : url.substring(0, firstSlash);
+                if (firstPart.indexOf('.') !== -1) {
+                    return 'https://' + url;
+                }
+                return url;
+            }
+
+            // 2. 危险协议检测（javascript: / data: / vbscript: / file:）
+            function isSafeUrl(url) {
+                if (!url) return false;
+                var lower = url.toLowerCase().trim();
+                if (/^(javascript|data|vbscript|file):/i.test(lower)) return false;
+                return true;
+            }
+
+            // 3. HTML 转义（防 XSS）
+            function escapeHtml(str) {
+                if (str == null) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            // 4. 通用错误渲染
+            function showError(icon, message, extraHtml) {
+                container.innerHTML =
+                    '<div class="not-found">' +
+                    '<div class="icon">' + icon + '</div>' +
+                    '<p>' + escapeHtml(message) + '</p>' +
+                    (extraHtml || '') +
+                    '</div>';
+                redirectBtn.style.display = 'none';
+                loadingMsg.classList.add('hidden');
+            }
+
+            function showErrorWithHint(icon, message, hint) {
+                container.innerHTML =
+                    '<div class="not-found">' +
+                    '<div class="icon">' + icon + '</div>' +
+                    '<p>' + escapeHtml(message) + '</p>' +
+                    '<p style="font-size:0.8rem;margin-top:8px;">' + escapeHtml(hint) + '</p>' +
+                    '</div>';
+                redirectBtn.style.display = 'none';
+                loadingMsg.classList.add('hidden');
+            }
+
+            // ---------- 获取 URL 参数 ----------
             var urlParams = new URLSearchParams(window.location.search);
             var id = urlParams.get('id');
-            var link = urlParams.get('link');          // 新增：常规链接
-            var directJump = urlParams.get('direct-jump'); // '1' 直接跳转，其他或缺失为点击跳转
+            var link = urlParams.get('link');
+            // 放宽 direct-jump 判断：支持 1/true/yes/on
+            var directJumpRaw = (urlParams.get('direct-jump') || '').toLowerCase();
+            var directJump = ['1', 'true', 'yes', 'on'].indexOf(directJumpRaw) !== -1;
 
-            // ---- 优先处理 link 参数 ----
+            // ---------- 处理 link 参数 ----------
             if (link && link.trim() !== '') {
-                // 如果 directJump === '1'，直接跳转
-                if (directJump === '1') {
+                var targetUrl = normalizeUrl(link);
+
+                if (!isSafeUrl(targetUrl)) {
+                    showError(
+                        '🚫',
+                        t('redirect.unsafe_protocol', '不支持的链接协议'),
+                        '<div class="link-display">' + escapeHtml(link) + '</div>'
+                    );
+                    return;
+                }
+
+                if (directJump) {
                     container.classList.add('hidden');
                     redirectBtn.style.display = 'none';
                     loadingMsg.classList.remove('hidden');
-                    window.location.href = link;
-                    return;
-                } else {
-                    // 显示链接信息和点击跳转按钮
-                    container.classList.remove('hidden');
-                    loadingMsg.classList.add('hidden');
-
-                    // 在容器中显示链接信息（复用 not-found 样式）
-                    container.innerHTML = `
-                        <div class="not-found">
-                            <div class="icon">🔗</div>
-                            <p>即将跳转到：</p>
-                            <div class="link-display">${link}</div>
-                        </div>
-                    `;
-
-                    // 设置按钮
-                    redirectBtn.href = link;
-                    redirectBtn.style.display = 'block';
+                    window.location.href = targetUrl;
                     return;
                 }
+
+                container.classList.remove('hidden');
+                loadingMsg.classList.add('hidden');
+                container.innerHTML =
+                    '<div class="not-found">' +
+                    '<div class="icon">🔗</div>' +
+                    '<p>' + escapeHtml(t('redirect.about_to_jump', '即将跳转到：')) + '</p>' +
+                    '<div class="link-display">' + escapeHtml(targetUrl) + '</div>' +
+                    '</div>';
+                redirectBtn.href = targetUrl;
+                redirectBtn.style.display = 'block';
+                return;
             }
 
-            // ---- 处理 id 参数（原有逻辑） ----
+            // ---------- 处理 id 参数 ----------
             if (!id) {
-                container.innerHTML = `
-                    <div class="not-found">
-                        <div class="icon">⚠️</div>
-                        <p>缺少文章 ID 或跳转链接</p>
-                        <p style="font-size:0.8rem;margin-top:8px;">请使用 ?id=数字 或 ?link=网址 访问</p>
-                    </div>
-                `;
-                redirectBtn.style.display = 'none';
-                loadingMsg.classList.add('hidden');
+                showErrorWithHint(
+                    '⚠️',
+                    t('redirect.missing_param', '缺少文章 ID 或跳转链接'),
+                    t('redirect.missing_param_hint', '请使用 ?id=数字 或 ?link=网址 访问')
+                );
+                return;
+            }
+
+            // ID 格式校验
+            var idNum = Number(id);
+            if (!/^\d+$/.test(id) || idNum < 1) {
+                showErrorWithHint(
+                    '⚠️',
+                    t('redirect.invalid_id', 'ID 格式不正确'),
+                    t('redirect.invalid_id_hint', 'ID 必须为正整数，当前值：') + id
+                );
                 return;
             }
 
             var articles = BLOG_DATA.articles || [];
-            var article = articles.find(function(a) { return a.id === Number(id); });
+            var article = articles.find(function (a) { return a.id === idNum; });
 
             if (!article) {
-                container.innerHTML = `
-                    <div class="not-found">
-                        <div class="icon">🔍</div>
-                        <p>未找到 ID 为 ${id} 的文章</p>
-                    </div>
-                `;
-                redirectBtn.style.display = 'none';
-                loadingMsg.classList.add('hidden');
+                showError(
+                    '🔍',
+                    t('redirect.article_not_found_prefix', '未找到 ID 为 ') +
+                    idNum +
+                    t('redirect.article_not_found_suffix', ' 的文章')
+                );
                 return;
             }
 
             if (!article.link) {
-                container.innerHTML = `
-                    <div class="not-found">
-                        <div class="icon">🔗</div>
-                        <p>该文章没有配置跳转链接</p>
-                    </div>
-                `;
-                redirectBtn.style.display = 'none';
-                loadingMsg.classList.add('hidden');
+                showError('🔗', t('redirect.no_link', '该文章没有配置跳转链接'));
                 return;
             }
 
-            // 文章存在且有效
-            if (directJump === '1') {
+            // ---------- 文章存在且有效 ----------
+            var articleUrl = normalizeUrl(article.link);
+
+            if (!isSafeUrl(articleUrl)) {
+                showError('🚫', t('redirect.unsafe_link', '该文章配置的链接协议不安全'));
+                return;
+            }
+
+            if (directJump) {
                 container.classList.add('hidden');
                 redirectBtn.style.display = 'none';
                 loadingMsg.classList.remove('hidden');
-                window.location.href = article.link;
+                window.location.href = articleUrl;
             } else {
                 container.classList.remove('hidden');
                 loadingMsg.classList.add('hidden');
 
                 if (typeof renderArticleCardById === 'function') {
-                    renderArticleCardById(id, container);
+                    renderArticleCardById(idNum, container);
                 } else {
-                    container.innerHTML = '<div style="color:red;text-align:center;padding:30px 0;">卡片渲染器未加载</div>';
+                    container.innerHTML =
+                        '<div style="color:red;text-align:center;padding:30px 0;">' +
+                        escapeHtml(t('redirect.card_renderer_missing', '卡片渲染器未加载')) +
+                        '</div>';
                     redirectBtn.style.display = 'none';
                     return;
                 }
 
-                redirectBtn.href = article.link;
+                redirectBtn.href = articleUrl;
                 redirectBtn.style.display = 'block';
             }
 
         })();
     </script>
 </body>
+
 </html>
